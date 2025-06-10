@@ -1,0 +1,41 @@
+# CameraModule Native Android Edge Cases
+
+This document describes how the custom native CameraModule handles and reports edge cases to the React Native JavaScript side.
+
+## Edge Cases & Error Handling
+
+### 1. Permission Denial
+- If the user denies camera or storage permissions, the camera intent will not launch, or the result will be canceled.
+- The module will reject the promise with:
+  - Code: `CANCELLED`
+  - Message: `Camera cancelled`
+- You should check and request permissions on the JS side before calling `launchCamera()`.
+
+### 2. Camera In Use
+- If another app is using the camera, the intent may fail to resolve.
+- The module will reject the promise with:
+  - Code: `NO_CAMERA`
+  - Message: `No camera app found`
+
+### 3. App Backgrounded
+- If the app is backgrounded or killed while the camera is open, the result will not be delivered and the promise will not resolve or reject.
+- You should handle this scenario on the JS side with a timeout or user feedback.
+
+### 4. Storage Issues
+- If the image file cannot be created (e.g., no storage, file system error), the module will reject the promise with:
+  - Code: `FILE_CREATION_FAILED`
+  - Message: (system error message)
+
+### 5. No Activity
+- If there is no current activity (e.g., app not in foreground), the module will reject the promise with:
+  - Code: `NO_ACTIVITY`
+  - Message: `No activity found`
+
+## Recommendations
+- Always check/request permissions before calling `launchCamera()`.
+- Handle promise rejections in JS and show user-friendly error messages.
+- Consider using a timeout or fallback if the app is backgrounded during camera use.
+
+---
+
+For more details, see the implementation in `CameraModule.java`.
